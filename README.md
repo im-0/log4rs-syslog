@@ -5,6 +5,12 @@ systems.
 
 ## Usage
 
+Add this to your Cargo.toml:
+```toml
+[dependencies]
+log4rs-syslog = "1.0"
+```
+
 ### Initialization based on configuration file
 
 Example configuration file:
