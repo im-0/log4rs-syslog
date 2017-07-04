@@ -1,0 +1,14 @@
+[package]
+name = "log4rs-syslog"
+description = "Syslog appender for log4s based on libc's syslog() function (*nix only)"
+version = "0.0.0"
+authors = ["Ivan Mironov <mironov.ivan@gmail.com>"]
+license = "MIT/Apache-2.0"
+keywords = ["logger", "log", "logging", "nix", "syslog"]
+categories = ["os::unix-apis"]
+publish = false
+
+[dependencies]
+libc = "*"
+log = "*"
+log4rs = "*"
