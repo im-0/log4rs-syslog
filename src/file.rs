@@ -48,7 +48,6 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
     }
 }
 
-#[cfg(feature = "file")]
 pub fn register_deserializer(deserializers: &mut log4rs::file::Deserializers) {
     deserializers.insert("syslog", SyslogAppenderDeserializer);
 }
