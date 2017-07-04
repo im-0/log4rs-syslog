@@ -1,3 +1,4 @@
+extern crate libc;
 #[macro_use]
 extern crate log;
 extern crate log4rs;
@@ -15,6 +16,16 @@ fn main() {
                 log4rs_syslog::LOG_PID,
                 log4rs_syslog::Facility::Daemon,
             )
+            // Custom rust log level <=> libc log level mapping.
+            .level_map(Box::new(|l| match l {
+                // WARNING: On linux this will broadcast error message on all consoles.
+                log::LogLevel::Error => libc::LOG_EMERG,
+
+                log::LogLevel::Warn => libc::LOG_WARNING,
+                log::LogLevel::Info => libc::LOG_INFO,
+                log::LogLevel::Debug => libc::LOG_DEBUG,
+                log::LogLevel::Trace => libc::LOG_DEBUG,
+            }))
             .build(),
     );
 

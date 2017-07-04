@@ -18,6 +18,14 @@ appenders:
       ident: log4rs-syslog-example
       option: LOG_PID | LOG_NDELAY | LOG_CONS
       facility: Daemon
+    level_map:
+      # WARNING: On linux this will broadcast error message on all consoles.
+      Error: LOG_EMERG
+
+      Warn: LOG_WARNING
+      Info: LOG_INFO
+      Debug: LOG_DEBUG
+      Trace: LOG_DEBUG
     encoder:
       pattern: "{M} - {m}"
 root:
