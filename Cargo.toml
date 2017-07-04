@@ -7,6 +7,9 @@ license = "MIT/Apache-2.0"
 keywords = ["logger", "log", "logging", "nix", "syslog"]
 categories = ["os::unix-apis"]
 publish = false
+repository = "https://github.com/im-0/log4rs-syslog"
+documentation = "https://github.com/im-0/log4rs-syslog"
+readme = "README.md"
 
 [features]
 default = ["file"]
