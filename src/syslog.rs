@@ -36,10 +36,27 @@ impl std::io::Write for BufWriter {
 
 impl log4rs::encode::Write for BufWriter {}
 
-#[derive(Debug)]
+pub type LevelMap = Fn(log::LogLevel) -> libc::c_int + Send + Sync;
+
 pub struct SyslogAppender {
     encoder: Box<log4rs::encode::Encode>,
     ident: Option<String>,
+    level_map: Option<Box<LevelMap>>,
+}
+
+impl std::fmt::Debug for SyslogAppender {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            formatter,
+            "SyslogAppender {{encoder: {:?}, ident: {:?}, level_map: {}}}",
+            self.encoder,
+            self.ident,
+            match self.level_map {
+                Some(_) => "Some(_)",
+                None => "None",
+            }
+        )
+    }
 }
 
 impl SyslogAppender {
@@ -47,6 +64,7 @@ impl SyslogAppender {
         SyslogAppenderBuilder {
             encoder: None,
             ident: None,
+            level_map: None,
         }
     }
 }
@@ -69,12 +87,18 @@ impl log4rs::append::Append for SyslogAppender {
         let mut buf = buf.into_inner();
         buf.push(0);
 
-        let level = match record.level() {
-            log::LogLevel::Error => libc::LOG_ERR,
-            log::LogLevel::Warn => libc::LOG_WARNING,
-            log::LogLevel::Info => libc::LOG_INFO,
-            log::LogLevel::Debug => libc::LOG_DEBUG,
-            log::LogLevel::Trace => libc::LOG_DEBUG,
+        let level = match self.level_map {
+            Some(ref level_map) => level_map(record.level()),
+
+            None => {
+                match record.level() {
+                    log::LogLevel::Error => libc::LOG_ERR,
+                    log::LogLevel::Warn => libc::LOG_WARNING,
+                    log::LogLevel::Info => libc::LOG_INFO,
+                    log::LogLevel::Debug => libc::LOG_DEBUG,
+                    log::LogLevel::Trace => libc::LOG_DEBUG,
+                }
+            },
         };
 
         unsafe {
@@ -201,6 +225,7 @@ impl Into<libc::c_int> for Facility {
 pub struct SyslogAppenderBuilder {
     encoder: Option<Box<log4rs::encode::Encode>>,
     ident: Option<String>,
+    level_map: Option<Box<LevelMap>>,
 }
 
 impl SyslogAppenderBuilder {
@@ -225,12 +250,18 @@ impl SyslogAppenderBuilder {
         self
     }
 
+    pub fn level_map(mut self, level_map: Box<LevelMap>) -> Self {
+        self.level_map = Some(level_map);
+        self
+    }
+
     pub fn build(self) -> SyslogAppender {
         SyslogAppender {
             encoder: self.encoder.unwrap_or_else(|| {
                 Box::new(log4rs::encode::pattern::PatternEncoder::default())
             }),
             ident: self.ident,
+            level_map: self.level_map,
         }
     }
 }
