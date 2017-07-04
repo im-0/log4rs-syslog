@@ -11,6 +11,9 @@ repository = "https://github.com/im-0/log4rs-syslog"
 documentation = "https://github.com/im-0/log4rs-syslog"
 readme = "README.md"
 
+[badges]
+travis-ci = { repository = "im-0/log4rs-syslog", branch = "master" }
+
 [features]
 default = ["file"]
 file = ["log4rs/file", "serde", "serde_derive"]

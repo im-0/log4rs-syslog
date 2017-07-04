@@ -1,3 +1,4 @@
+[![Build Status](https://api.travis-ci.org/im-0/log4rs-syslog.svg?branch=master)](https://travis-ci.org/im-0/log4rs-syslog)
 ## Description
 
 `log4rs-syslog` - very simple syslog appender for the log4s based on the libc's syslog() function. Supports only *nix
