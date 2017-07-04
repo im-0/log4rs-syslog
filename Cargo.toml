@@ -8,8 +8,18 @@ keywords = ["logger", "log", "logging", "nix", "syslog"]
 categories = ["os::unix-apis"]
 publish = false
 
+[features]
+default = ["file"]
+file = ["log4rs/file", "serde", "serde_derive"]
+
 [dependencies]
-bitflags = "*"
-libc = "*"
-log = "*"
+bitflags = { version = "*", default_features = false }
+libc = { version = "*", default_features = false }
+log = { version = "*", default_features = false }
+log4rs = { version = "*", default_features = false }
+serde = { version = "*", default_features = false, optional = true }
+serde_derive = { version = "*", default_features = false, optional = true }
+
+[dev-dependencies]
 log4rs = "*"
+tempfile = "*"

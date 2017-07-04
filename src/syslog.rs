@@ -3,6 +3,8 @@ use std;
 use libc;
 use log;
 use log4rs;
+#[cfg(feature = "file")]
+use serde;
 
 const DEFAULT_BUF_SIZE: usize = 4096;
 
@@ -98,6 +100,54 @@ bitflags! {
     }
 }
 
+#[cfg(feature = "file")]
+struct LogOptionVisitor;
+
+#[cfg(feature = "file")]
+impl<'de> serde::de::Visitor<'de> for LogOptionVisitor {
+    type Value = LogOption;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("list of flags separated by \"|\"")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        let mut flags = LogOption::empty();
+
+        let value = value.trim();
+        if !value.is_empty() {
+            for str_flag in value.split('|') {
+                let str_flag = str_flag.trim();
+                match str_flag {
+                    "LOG_CONS" => flags = flags | LOG_CONS,
+                    "LOG_NDELAY" => flags = flags | LOG_NDELAY,
+                    "LOG_NOWAIT" => flags = flags | LOG_NOWAIT,
+                    "LOG_ODELAY" => flags = flags | LOG_ODELAY,
+                    "LOG_PERROR" => flags = flags | LOG_PERROR,
+                    "LOG_PID" => flags = flags | LOG_PID,
+                    unknown => return Err(E::custom(format!("Unknown syslog flag: \"{}\"", unknown))),
+                }
+            }
+        }
+
+        Ok(flags)
+    }
+}
+
+#[cfg(feature = "file")]
+impl<'de> serde::de::Deserialize<'de> for LogOption {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::de::Deserializer<'de>,
+    {
+        deserializer.deserialize_str(LogOptionVisitor)
+    }
+}
+
+#[cfg_attr(feature = "file", derive(Deserialize))]
 pub enum Facility {
     Auth,
     AuthPriv,
