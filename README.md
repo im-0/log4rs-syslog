@@ -2,10 +2,14 @@
 [![crates.io](https://img.shields.io/crates/v/log4rs-syslog.svg?maxAge=3600)](https://crates.io/crates/log4rs-syslog)
 ![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache_2.0-blue.svg)
 ![POSIX-only build tooling](https://img.shields.io/badge/dev_platform-POSIX-lightgrey.svg)
-## Description
+# log4rs-syslog
 
 `log4rs-syslog` - very simple syslog appender for the log4s based on the libc's syslog() function. Supports only *nix
 systems.
+
+Features:
+* Logging with or without calling openlog() with identification string, logging options and facility.
+* Custom mapping between rust's `log` crate log levels and syslog's log levels.
 
 ## Usage
 
@@ -103,4 +107,13 @@ fn main() {
 
     println!("Check your logs for new messages");
 }
+```
+
+### Running examples
+
+```bash
+git clone --branch master https://github.com/im-0/log4rs-syslog
+cd log4rs-syslog
+cargo run --example manually
+cargo run --example from_conf
 ```
