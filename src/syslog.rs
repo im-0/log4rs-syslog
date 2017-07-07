@@ -36,8 +36,10 @@ impl std::io::Write for BufWriter {
 
 impl log4rs::encode::Write for BufWriter {}
 
+/// Function for mapping rust's `log` levels to `libc`'s log levels.
 pub type LevelMap = Fn(log::LogLevel) -> libc::c_int + Send + Sync;
 
+/// An appender which writes log invents into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
     encoder: Box<log4rs::encode::Encode>,
     ident: Option<String>,
@@ -60,6 +62,7 @@ impl std::fmt::Debug for SyslogAppender {
 }
 
 impl SyslogAppender {
+    /// Create new builder for `SyslogAppender`.
     pub fn builder() -> SyslogAppenderBuilder {
         SyslogAppenderBuilder {
             encoder: None,
@@ -114,12 +117,21 @@ impl log4rs::append::Append for SyslogAppender {
 }
 
 bitflags! {
+    /// Syslog option flags.
     pub struct LogOption: libc::c_int {
+        /// Write directly to system console if there is an error while sending to system logger.
         const LOG_CONS   = libc::LOG_CONS;
+        /// Open the connection immediately (normally, the connection is opened when the first message is logged).
         const LOG_NDELAY = libc::LOG_NDELAY;
+        /// Don't wait for child processes that may have been created while logging the message.
+        /// The GNU C library does not create a child process, so this option has no effect on Linux.
         const LOG_NOWAIT = libc::LOG_NOWAIT;
+        /// The converse of LOG_NDELAY; opening of the connection is delayed until syslog() is called.
+        /// This is the default, and need not be specified.
         const LOG_ODELAY = libc::LOG_ODELAY;
+        /// Print to stderr as well. (Not in POSIX.1-2001 or POSIX.1-2008.)
         const LOG_PERROR = libc::LOG_PERROR;
+        /// Include PID with each message.
         const LOG_PID    = libc::LOG_PID;
     }
 }
@@ -172,26 +184,47 @@ impl<'de> serde::de::Deserialize<'de> for LogOption {
 }
 
 #[cfg_attr(feature = "file", derive(Deserialize))]
+/// The type of program.
 pub enum Facility {
+    /// Security/authorization.
     Auth,
+    /// Security/authorization (private).
     AuthPriv,
+    /// Clock daemon (cron and at).
     Cron,
+    /// System daemons without separate facility value.
     Daemon,
+    /// FTP daemon.
     Ftp,
+    /// Kernel messages (these can't be generated from user processes).
     Kern,
+    /// Reserved for local use.
     Local0,
+    /// Reserved for local use.
     Local1,
+    /// Reserved for local use.
     Local2,
+    /// Reserved for local use.
     Local3,
+    /// Reserved for local use.
     Local4,
+    /// Reserved for local use.
     Local5,
+    /// Reserved for local use.
     Local6,
+    /// Reserved for local use.
     Local7,
+    /// Line printer subsystem.
     Lpr,
+    /// Mail subsystem.
     Mail,
+    /// USENET news subsystem.
     News,
+    /// Messages generated internally by syslogd.
     Syslog,
+    /// Generic user-level messages. This is the default when not calling openlog().
     User,
+    /// UUCP subsystem.
     Uucp,
 }
 
@@ -222,6 +255,7 @@ impl Into<libc::c_int> for Facility {
     }
 }
 
+/// Builder for `SyslogAppender`.
 pub struct SyslogAppenderBuilder {
     encoder: Option<Box<log4rs::encode::Encode>>,
     ident: Option<String>,
@@ -229,11 +263,13 @@ pub struct SyslogAppenderBuilder {
 }
 
 impl SyslogAppenderBuilder {
+    /// Set custom encoder.
     pub fn encoder(mut self, encoder: Box<log4rs::encode::Encode>) -> Self {
         self.encoder = Some(encoder);
         self
     }
 
+    /// Call openlog().
     pub fn openlog(mut self, ident: &str, option: LogOption, facility: Facility) -> Self {
         // At least on Linux openlog() does not copy this string, so we should keep it available.
         let mut ident = String::from(ident);
@@ -250,11 +286,13 @@ impl SyslogAppenderBuilder {
         self
     }
 
+    /// Set custom log level mapping.
     pub fn level_map(mut self, level_map: Box<LevelMap>) -> Self {
         self.level_map = Some(level_map);
         self
     }
 
+    /// Consume builder and produce `SyslogAppender`.
     pub fn build(self) -> SyslogAppender {
         SyslogAppender {
             encoder: self.encoder.unwrap_or_else(|| {
