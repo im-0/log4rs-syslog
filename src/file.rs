@@ -115,6 +115,20 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
     }
 }
 
+/// Register deserializer for creating syslog appender based on log4rs configuration file.
+///
+/// See `./examples/from_conf.rs for full example.
+///
+/// # Examples
+///
+/// ```
+/// extern crate log4rs;
+/// extern crate log4rs_syslog;
+///
+/// let mut deserializers = log4rs::file::Deserializers::new();
+/// log4rs_syslog::register_deserializer(&mut deserializers);
+/// let result = log4rs::init_file("/path/to/log-conf.yaml", deserializers);
+/// ```
 pub fn register_deserializer(deserializers: &mut log4rs::file::Deserializers) {
     deserializers.insert("syslog", SyslogAppenderDeserializer);
 }
