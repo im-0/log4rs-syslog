@@ -7,6 +7,8 @@
 `log4rs-syslog` - very simple syslog appender for the log4s based on the libc's syslog() function. Supports only *nix
 systems.
 
+[Documentation on docs.rs](https://docs.rs/crate/log4rs-syslog)
+
 Features:
 * Logging with or without calling openlog() with identification string, logging options and facility.
 * Custom mapping between rust's `log` crate log levels and syslog's log levels.
