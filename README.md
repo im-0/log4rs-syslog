@@ -4,7 +4,7 @@
 ![POSIX-only build tooling](https://img.shields.io/badge/dev_platform-POSIX-lightgrey.svg)
 # log4rs-syslog
 
-`log4rs-syslog` - very simple syslog appender for the log4s based on the libc's syslog() function. Supports only *nix
+`log4rs-syslog` - very simple syslog appender for the log4rs based on the libc's syslog() function. Supports only *nix
 systems.
 
 [Documentation on docs.rs](https://docs.rs/crate/log4rs-syslog)
