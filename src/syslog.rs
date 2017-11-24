@@ -42,7 +42,6 @@ pub type LevelMap = Fn(log::LogLevel) -> libc::c_int + Send + Sync;
 /// An appender which writes log invents into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
     encoder: Box<log4rs::encode::Encode>,
-    ident: Option<String>,
     level_map: Option<Box<LevelMap>>,
 }
 
@@ -50,9 +49,8 @@ impl std::fmt::Debug for SyslogAppender {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             formatter,
-            "SyslogAppender {{encoder: {:?}, ident: {:?}, level_map: {}}}",
+            "SyslogAppender {{encoder: {:?}, level_map: {}}}",
             self.encoder,
-            self.ident,
             match self.level_map {
                 Some(_) => "Some(_)",
                 None => "None",
@@ -66,18 +64,8 @@ impl SyslogAppender {
     pub fn builder() -> SyslogAppenderBuilder {
         SyslogAppenderBuilder {
             encoder: None,
-            ident: None,
+            openlog_args: None,
             level_map: None,
-        }
-    }
-}
-
-impl Drop for SyslogAppender {
-    fn drop(&mut self) {
-        if self.ident.is_some() {
-            unsafe {
-                libc::closelog();
-            }
         }
     }
 }
@@ -183,6 +171,7 @@ impl<'de> serde::de::Deserialize<'de> for LogOption {
     }
 }
 
+#[derive(Debug)]
 #[cfg_attr(feature = "file", derive(Deserialize))]
 /// The type of program.
 pub enum Facility {
@@ -255,10 +244,67 @@ impl Into<libc::c_int> for Facility {
     }
 }
 
+struct OpenLogArgs {
+    ident: String,
+    log_option: LogOption,
+    facility: Facility,
+}
+
+struct IdentHolder {
+    ident: Option<String>,
+}
+
+impl IdentHolder {
+    fn new() -> Self {
+        Self {
+            ident: None,
+        }
+    }
+
+    fn openlog(&mut self, mut args: OpenLogArgs) {
+        args.ident.push('\0');
+
+        unsafe {
+            libc::openlog(
+                args.ident.as_ptr() as *const libc::c_char,
+                args.log_option.bits(),
+                args.facility.into(),
+            );
+        }
+
+        // At least on Linux openlog() does not copy this string, so we should keep it available.
+        self.ident = Some(args.ident);
+    }
+
+    fn closelog(&mut self) {
+        if self.ident.is_some() {
+            unsafe {
+                libc::closelog();
+            }
+        }
+    }
+
+    fn no_openlog(&mut self) {
+        self.closelog();
+        self.ident = None;
+    }
+}
+
+impl Drop for IdentHolder {
+    fn drop(&mut self) {
+        // Currently this function is never used automatically because IdentHolder is created only by lazy_static.
+        self.closelog();
+    }
+}
+
+lazy_static! {
+    static ref IDENT_HOLDER: std::sync::Mutex<IdentHolder> = std::sync::Mutex::new(IdentHolder::new());
+}
+
 /// Builder for `SyslogAppender`.
 pub struct SyslogAppenderBuilder {
     encoder: Option<Box<log4rs::encode::Encode>>,
-    ident: Option<String>,
+    openlog_args: Option<OpenLogArgs>,
     level_map: Option<Box<LevelMap>>,
 }
 
@@ -271,18 +317,11 @@ impl SyslogAppenderBuilder {
 
     /// Call openlog().
     pub fn openlog(mut self, ident: &str, option: LogOption, facility: Facility) -> Self {
-        // At least on Linux openlog() does not copy this string, so we should keep it available.
-        let mut ident = String::from(ident);
-        ident.push('\0');
-        unsafe {
-            libc::openlog(
-                ident.as_ptr() as *const libc::c_char,
-                option.bits(),
-                facility.into(),
-            );
-        }
-
-        self.ident = Some(ident);
+        self.openlog_args = Some(OpenLogArgs {
+            ident: String::from(ident),
+            log_option: option,
+            facility,
+        });
         self
     }
 
@@ -294,11 +333,15 @@ impl SyslogAppenderBuilder {
 
     /// Consume builder and produce `SyslogAppender`.
     pub fn build(self) -> SyslogAppender {
+        self.openlog_args.map_or_else(
+            || IDENT_HOLDER.lock().unwrap().no_openlog(),
+            |openlog_args| IDENT_HOLDER.lock().unwrap().openlog(openlog_args),
+        );
+
         SyslogAppender {
             encoder: self.encoder.unwrap_or_else(|| {
                 Box::new(log4rs::encode::pattern::PatternEncoder::default())
             }),
-            ident: self.ident,
             level_map: self.level_map,
         }
     }

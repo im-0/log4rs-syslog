@@ -21,6 +21,7 @@ file = ["log4rs/file", "serde", "serde_derive"]
 
 [dependencies]
 bitflags = { version = "*", default_features = false }
+lazy_static = { version = "*", default_features = false }
 libc = { version = "*", default_features = false }
 log = { version = "*", default_features = false }
 log4rs = { version = "*", default_features = false }

@@ -13,6 +13,13 @@ Features:
 * Logging with or without calling openlog() with identification string, logging options and facility.
 * Custom mapping between rust's `log` crate log levels and syslog's log levels.
 
+Limitations:
+* When there are multiple syslog appenders, openlog() configuration of last built appender is used.
+* openlog() configuration applied when log4rs_syslog::SyslogAppenderBuilder::build() called, not on
+log4rs::init_config() or log4rs::Handle::set_config().
+
+There is no proper way to fix this limitations while using libc's interface.
+
 ## Usage
 
 Add this to your Cargo.toml:
