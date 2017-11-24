@@ -10,6 +10,7 @@ publish = true
 repository = "https://github.com/im-0/log4rs-syslog"
 documentation = "https://github.com/im-0/log4rs-syslog"
 readme = "README.md"
+build = "build.rs"
 
 [badges]
 travis-ci = { repository = "im-0/log4rs-syslog", branch = "b1.0.0" }
@@ -26,6 +27,10 @@ log4rs = { version = "0.7", default_features = false }
 serde = { version = "1.0", default_features = false, optional = true }
 serde_derive = { version = "1.0", default_features = false, optional = true }
 
+[build-dependencies]
+skeptic = "0.13"
+
 [dev-dependencies]
 log4rs = "0.7"
 tempfile = "2.1"
+skeptic = "0.13"
