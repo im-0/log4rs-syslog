@@ -41,7 +41,7 @@ root:
 ```
 
 Example code:
-```rust
+```rust,no_run
 #[macro_use]
 extern crate log;
 extern crate log4rs;
@@ -69,7 +69,7 @@ fn main() {
 ### Manual initialization
 
 Example code:
-```rust
+```rust,no_run
 #[macro_use]
 extern crate log;
 extern crate log4rs;
