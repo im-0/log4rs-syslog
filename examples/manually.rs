@@ -13,7 +13,7 @@ fn main() {
             .encoder(encoder)
             .openlog(
                 "log4rs-syslog-example",
-                log4rs_syslog::LOG_PID,
+                log4rs_syslog::LogOption::LOG_PID,
                 log4rs_syslog::Facility::Daemon,
             )
             // Custom rust log level <=> libc log level mapping.
