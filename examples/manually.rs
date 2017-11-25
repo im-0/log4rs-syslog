@@ -23,8 +23,7 @@ fn main() {
 
                 log::LogLevel::Warn => libc::LOG_WARNING,
                 log::LogLevel::Info => libc::LOG_INFO,
-                log::LogLevel::Debug => libc::LOG_DEBUG,
-                log::LogLevel::Trace => libc::LOG_DEBUG,
+                log::LogLevel::Debug | log::LogLevel::Trace => libc::LOG_DEBUG,
             }))
             .build(),
     );
