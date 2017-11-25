@@ -8,7 +8,7 @@ keywords = ["logger", "log", "logging", "nix", "syslog"]
 categories = ["os::unix-apis"]
 publish = false
 repository = "https://github.com/im-0/log4rs-syslog"
-documentation = "https://github.com/im-0/log4rs-syslog"
+documentation = "https://docs.rs/crate/log4rs-syslog"
 readme = "README.md"
 build = "build.rs"
 
