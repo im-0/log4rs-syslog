@@ -31,7 +31,7 @@ There is no proper way to fix this limitations while using libc's interface.
 Add this to your Cargo.toml:
 ```toml
 [dependencies]
-log4rs-syslog = "1.0"
+log4rs-syslog = "1.1"
 ```
 
 ### Initialization based on configuration file
