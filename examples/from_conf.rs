@@ -13,7 +13,7 @@ fn main() {
     let yaml_conf = br#"
 appenders:
   syslog:
-    kind: syslog
+    kind: libc-syslog
     openlog:
       ident: log4rs-syslog-example
       option: LOG_PID | LOG_NDELAY | LOG_CONS

@@ -24,6 +24,7 @@ There is no proper way to fix this limitations while using libc's interface.
 
 **1.0 → 1.1**
 * `log4rs_syslog::register_deserializer()` renamed to `log4rs_syslog::register()`.
+* `kind` in deserializable configuration file changed from `syslog` to `libc-syslog`.
 
 ## Usage
 
@@ -39,7 +40,7 @@ Example configuration file:
 ```yaml
 appenders:
   syslog:
-    kind: syslog
+    kind: libc-syslog
     openlog:
       ident: log4rs-syslog-example
       option: LOG_PID | LOG_NDELAY | LOG_CONS

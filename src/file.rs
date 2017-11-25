@@ -129,5 +129,5 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
 /// let result = log4rs::init_file("/path/to/log-conf.yaml", deserializers);
 /// ```
 pub fn register(deserializers: &mut log4rs::file::Deserializers) {
-    deserializers.insert("syslog", SyslogAppenderDeserializer);
+    deserializers.insert("libc-syslog", SyslogAppenderDeserializer);
 }
