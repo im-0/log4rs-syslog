@@ -38,7 +38,7 @@ root:
         .suffix(".yaml")
         .create()
         .unwrap();
-    tmp_conf.write(yaml_conf).unwrap();
+    tmp_conf.write_all(yaml_conf).unwrap();
     tmp_conf.flush().unwrap();
 
     log4rs::init_file(tmp_conf.path(), deserializers).unwrap();
