@@ -1,5 +1,10 @@
 #!/bin/sh -xeu
 
+is_nightly() {
+    # Fixed version of nightly for clippy.
+    echo "${TRAVIS_RUST_VERSION}" | grep -qe "^nightly"
+}
+
 is_nightly_for_clippy() {
     # Fixed version of nightly for clippy.
     echo "${TRAVIS_RUST_VERSION}" | grep -qe "^nightly-.*"
@@ -11,7 +16,11 @@ if [ "${1}" = "before_script" ]; then
     fi
 elif [ "${1}" = "script" ]; then
     if is_nightly_for_clippy; then
-        cargo clippy
+        cargo clippy --features unstable
+    fi
+
+    if is_nightly; then
+        cargo bench --features unstable
     fi
 else
     printf "Unknown command: %s\n" "${1}" >&2
