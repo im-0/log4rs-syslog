@@ -25,6 +25,8 @@ There is no proper way to fix this limitations while using libc's interface.
 **1.0 → 1.1**
 * `log4rs_syslog::register_deserializer()` renamed to `log4rs_syslog::register()`.
 * `kind` in deserializable configuration file changed from `syslog` to `libc-syslog`.
+* Log option constants changed from `log4rs_syslog::LOG_*` to `log4rs_syslog::LogOption::LOG_*` due to changes in 
+`bitflags` crate.
 
 ## Usage
 
