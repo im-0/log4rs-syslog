@@ -8,29 +8,39 @@ use serde;
 
 const DEFAULT_BUF_SIZE: usize = 4096;
 
-struct BufWriter {
-    buf: std::io::Cursor<Vec<u8>>,
+type PersistentBuf = std::io::Cursor<Vec<u8>>;
+
+thread_local! {
+    static PERSISTENT_BUF: std::cell::RefCell<PersistentBuf> =
+        std::cell::RefCell::new(PersistentBuf::new(Vec::with_capacity(DEFAULT_BUF_SIZE)));
 }
 
+struct BufWriter {}
+
 impl BufWriter {
-    pub fn new() -> Self {
-        Self {
-            buf: std::io::Cursor::new(Vec::with_capacity(DEFAULT_BUF_SIZE)),
-        }
+    fn new() -> Self {
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().set_position(0));
+        Self {}
     }
 
-    pub fn into_inner(self) -> Vec<u8> {
-        self.buf.into_inner()
+    fn as_c_str(&mut self) -> *const libc::c_char {
+        use std::io::Write;
+
+        PERSISTENT_BUF.with(|pers_buf| {
+            let mut pers_buf = pers_buf.borrow_mut();
+            pers_buf.write_all(&[0; 1]).unwrap();
+            pers_buf.get_ref().as_ptr() as *const libc::c_char
+        })
     }
 }
 
 impl std::io::Write for BufWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.buf.write(buf)
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().write(buf))
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
-        self.buf.flush()
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().flush())
     }
 }
 
@@ -42,7 +52,6 @@ pub type LevelMap = Fn(log::LogLevel) -> libc::c_int + Send + Sync;
 /// An appender which writes log invents into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
     encoder: Box<log4rs::encode::Encode>,
-    ident: Option<String>,
     level_map: Option<Box<LevelMap>>,
 }
 
@@ -50,9 +59,8 @@ impl std::fmt::Debug for SyslogAppender {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             formatter,
-            "SyslogAppender {{encoder: {:?}, ident: {:?}, level_map: {}}}",
+            "SyslogAppender {{encoder: {:?}, level_map: {}}}",
             self.encoder,
-            self.ident,
             match self.level_map {
                 Some(_) => "Some(_)",
                 None => "None",
@@ -66,18 +74,8 @@ impl SyslogAppender {
     pub fn builder() -> SyslogAppenderBuilder {
         SyslogAppenderBuilder {
             encoder: None,
-            ident: None,
+            openlog_args: None,
             level_map: None,
-        }
-    }
-}
-
-impl Drop for SyslogAppender {
-    fn drop(&mut self) {
-        if self.ident.is_some() {
-            unsafe {
-                libc::closelog();
-            }
         }
     }
 }
@@ -87,8 +85,6 @@ impl log4rs::append::Append for SyslogAppender {
         let mut buf = BufWriter::new();
 
         self.encoder.encode(&mut buf, record)?;
-        let mut buf = buf.into_inner();
-        buf.push(0);
 
         let level = match self.level_map {
             Some(ref level_map) => level_map(record.level()),
@@ -98,8 +94,7 @@ impl log4rs::append::Append for SyslogAppender {
                     log::LogLevel::Error => libc::LOG_ERR,
                     log::LogLevel::Warn => libc::LOG_WARNING,
                     log::LogLevel::Info => libc::LOG_INFO,
-                    log::LogLevel::Debug => libc::LOG_DEBUG,
-                    log::LogLevel::Trace => libc::LOG_DEBUG,
+                    log::LogLevel::Debug | log::LogLevel::Trace => libc::LOG_DEBUG,
                 }
             },
         };
@@ -108,7 +103,7 @@ impl log4rs::append::Append for SyslogAppender {
             libc::syslog(
                 level,
                 b"%s\0".as_ptr() as *const libc::c_char,
-                buf.as_ptr() as *const libc::c_char,
+                buf.as_c_str(),
             );
         }
 
@@ -158,12 +153,12 @@ impl<'de> serde::de::Visitor<'de> for LogOptionVisitor {
             for str_flag in value.split('|') {
                 let str_flag = str_flag.trim();
                 match str_flag {
-                    "LOG_CONS" => flags = flags | LOG_CONS,
-                    "LOG_NDELAY" => flags = flags | LOG_NDELAY,
-                    "LOG_NOWAIT" => flags = flags | LOG_NOWAIT,
-                    "LOG_ODELAY" => flags = flags | LOG_ODELAY,
-                    "LOG_PERROR" => flags = flags | LOG_PERROR,
-                    "LOG_PID" => flags = flags | LOG_PID,
+                    "LOG_CONS" => flags |= LOG_CONS,
+                    "LOG_NDELAY" => flags |= LOG_NDELAY,
+                    "LOG_NOWAIT" => flags |= LOG_NOWAIT,
+                    "LOG_ODELAY" => flags |= LOG_ODELAY,
+                    "LOG_PERROR" => flags |= LOG_PERROR,
+                    "LOG_PID" => flags |= LOG_PID,
                     unknown => return Err(E::custom(format!("Unknown syslog flag: \"{}\"", unknown))),
                 }
             }
@@ -183,6 +178,7 @@ impl<'de> serde::de::Deserialize<'de> for LogOption {
     }
 }
 
+#[derive(Debug)]
 #[cfg_attr(feature = "file", derive(Deserialize))]
 /// The type of program.
 pub enum Facility {
@@ -255,10 +251,67 @@ impl Into<libc::c_int> for Facility {
     }
 }
 
+struct OpenLogArgs {
+    ident: String,
+    log_option: LogOption,
+    facility: Facility,
+}
+
+struct IdentHolder {
+    ident: Option<String>,
+}
+
+impl IdentHolder {
+    fn new() -> Self {
+        Self {
+            ident: None,
+        }
+    }
+
+    fn openlog(&mut self, mut args: OpenLogArgs) {
+        args.ident.push('\0');
+
+        unsafe {
+            libc::openlog(
+                args.ident.as_ptr() as *const libc::c_char,
+                args.log_option.bits(),
+                args.facility.into(),
+            );
+        }
+
+        // At least on Linux openlog() does not copy this string, so we should keep it available.
+        self.ident = Some(args.ident);
+    }
+
+    fn closelog(&mut self) {
+        if self.ident.is_some() {
+            unsafe {
+                libc::closelog();
+            }
+        }
+    }
+
+    fn no_openlog(&mut self) {
+        self.closelog();
+        self.ident = None;
+    }
+}
+
+impl Drop for IdentHolder {
+    fn drop(&mut self) {
+        // Currently this function is never used automatically because IdentHolder is created only by lazy_static.
+        self.closelog();
+    }
+}
+
+lazy_static! {
+    static ref IDENT_HOLDER: std::sync::Mutex<IdentHolder> = std::sync::Mutex::new(IdentHolder::new());
+}
+
 /// Builder for `SyslogAppender`.
 pub struct SyslogAppenderBuilder {
     encoder: Option<Box<log4rs::encode::Encode>>,
-    ident: Option<String>,
+    openlog_args: Option<OpenLogArgs>,
     level_map: Option<Box<LevelMap>>,
 }
 
@@ -271,18 +324,11 @@ impl SyslogAppenderBuilder {
 
     /// Call openlog().
     pub fn openlog(mut self, ident: &str, option: LogOption, facility: Facility) -> Self {
-        // At least on Linux openlog() does not copy this string, so we should keep it available.
-        let mut ident = String::from(ident);
-        ident.push('\0');
-        unsafe {
-            libc::openlog(
-                ident.as_ptr() as *const libc::c_char,
-                option.bits(),
-                facility.into(),
-            );
-        }
-
-        self.ident = Some(ident);
+        self.openlog_args = Some(OpenLogArgs {
+            ident: String::from(ident),
+            log_option: option,
+            facility,
+        });
         self
     }
 
@@ -294,12 +340,41 @@ impl SyslogAppenderBuilder {
 
     /// Consume builder and produce `SyslogAppender`.
     pub fn build(self) -> SyslogAppender {
+        self.openlog_args.map_or_else(
+            || IDENT_HOLDER.lock().unwrap().no_openlog(),
+            |openlog_args| IDENT_HOLDER.lock().unwrap().openlog(openlog_args),
+        );
+
         SyslogAppender {
             encoder: self.encoder.unwrap_or_else(|| {
                 Box::new(log4rs::encode::pattern::PatternEncoder::default())
             }),
-            ident: self.ident,
             level_map: self.level_map,
         }
+    }
+}
+
+#[cfg(all(feature = "unstable", test))]
+mod bench {
+    use test;
+
+    fn bench(bencher: &mut test::Bencher, data: &[u8]) {
+        use std::io::Write;
+
+        bencher.iter(|| {
+            let mut buf = super::BufWriter::new();
+            buf.write(data).unwrap();
+            buf.as_c_str()
+        })
+    }
+
+    #[bench]
+    fn buf_writer_no_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE - 1])
+    }
+
+    #[bench]
+    fn buf_writer_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE])
     }
 }

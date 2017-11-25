@@ -102,13 +102,12 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
                 log::LogLevel::Trace,
             ]
             {
-                map.get(level).ok_or(format!(
-                    "Log level missing in map: {:?}",
-                    level
-                ))?;
+                map.get(level).ok_or_else(|| {
+                    format!("Log level missing in map: {:?}", level)
+                })?;
             }
 
-            builder = builder.level_map(Box::new(move |l| *map.get(&l).unwrap()));
+            builder = builder.level_map(Box::new(move |l| map[&l]));
         }
 
         Ok(Box::new(builder.build()))
@@ -117,7 +116,7 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
 
 /// Register deserializer for creating syslog appender based on log4rs configuration file.
 ///
-/// See `./examples/from_conf.rs for full example.
+/// See `./examples/from_conf.rs` for full example.
 ///
 /// # Examples
 ///
