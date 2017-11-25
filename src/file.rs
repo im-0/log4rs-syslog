@@ -125,9 +125,9 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
 /// extern crate log4rs_syslog;
 ///
 /// let mut deserializers = log4rs::file::Deserializers::new();
-/// log4rs_syslog::register_deserializer(&mut deserializers);
+/// log4rs_syslog::register(&mut deserializers);
 /// let result = log4rs::init_file("/path/to/log-conf.yaml", deserializers);
 /// ```
-pub fn register_deserializer(deserializers: &mut log4rs::file::Deserializers) {
+pub fn register(deserializers: &mut log4rs::file::Deserializers) {
     deserializers.insert("syslog", SyslogAppenderDeserializer);
 }

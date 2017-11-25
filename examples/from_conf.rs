@@ -8,7 +8,7 @@ fn main() {
     use std::io::Write;
 
     let mut deserializers = log4rs::file::Deserializers::new();
-    log4rs_syslog::register_deserializer(&mut deserializers);
+    log4rs_syslog::register(&mut deserializers);
 
     let yaml_conf = br#"
 appenders:
