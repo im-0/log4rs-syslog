@@ -1,7 +1,7 @@
 //! Very simple syslog appender for the log4rs based on the libc's syslog() function.
 //! Supports only *nix systems.
 //!
-//! Source code and examples: https://github.com/im-0/log4rs-syslog
+//! Source code and examples: <https://github.com/im-0/log4rs-syslog>
 
 #[macro_use]
 extern crate bitflags;
