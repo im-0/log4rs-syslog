@@ -86,8 +86,7 @@ impl log4rs::append::Append for SyslogAppender {
                     log::LogLevel::Error => libc::LOG_ERR,
                     log::LogLevel::Warn => libc::LOG_WARNING,
                     log::LogLevel::Info => libc::LOG_INFO,
-                    log::LogLevel::Debug => libc::LOG_DEBUG,
-                    log::LogLevel::Trace => libc::LOG_DEBUG,
+                    log::LogLevel::Debug | log::LogLevel::Trace => libc::LOG_DEBUG,
                 }
             },
         };
@@ -146,12 +145,12 @@ impl<'de> serde::de::Visitor<'de> for LogOptionVisitor {
             for str_flag in value.split('|') {
                 let str_flag = str_flag.trim();
                 match str_flag {
-                    "LOG_CONS" => flags = flags | LogOption::LOG_CONS,
-                    "LOG_NDELAY" => flags = flags | LogOption::LOG_NDELAY,
-                    "LOG_NOWAIT" => flags = flags | LogOption::LOG_NOWAIT,
-                    "LOG_ODELAY" => flags = flags | LogOption::LOG_ODELAY,
-                    "LOG_PERROR" => flags = flags | LogOption::LOG_PERROR,
-                    "LOG_PID" => flags = flags | LogOption::LOG_PID,
+                    "LOG_CONS" => flags |= LogOption::LOG_CONS,
+                    "LOG_NDELAY" => flags |= LogOption::LOG_NDELAY,
+                    "LOG_NOWAIT" => flags |= LogOption::LOG_NOWAIT,
+                    "LOG_ODELAY" => flags |= LogOption::LOG_ODELAY,
+                    "LOG_PERROR" => flags |= LogOption::LOG_PERROR,
+                    "LOG_PID" => flags |= LogOption::LOG_PID,
                     unknown => return Err(E::custom(format!("Unknown syslog flag: \"{}\"", unknown))),
                 }
             }
