@@ -8,12 +8,12 @@ fn main() {
     use std::io::Write;
 
     let mut deserializers = log4rs::file::Deserializers::new();
-    log4rs_syslog::register_deserializer(&mut deserializers);
+    log4rs_syslog::register(&mut deserializers);
 
     let yaml_conf = br#"
 appenders:
   syslog:
-    kind: syslog
+    kind: libc-syslog
     openlog:
       ident: log4rs-syslog-example
       option: LOG_PID | LOG_NDELAY | LOG_CONS

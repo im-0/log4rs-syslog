@@ -20,12 +20,20 @@ log4rs::init_config() or log4rs::Handle::set_config().
 
 There is no proper way to fix this limitations while using libc's interface.
 
+## Breaking changes
+
+**1.0 → 1.1**
+* `log4rs_syslog::register_deserializer()` renamed to `log4rs_syslog::register()`.
+* `kind` in deserializable configuration file changed from `syslog` to `libc-syslog`.
+* Log option constants changed from `log4rs_syslog::LOG_*` to `log4rs_syslog::LogOption::LOG_*` due to changes in 
+`bitflags` crate.
+
 ## Usage
 
 Add this to your Cargo.toml:
 ```toml
 [dependencies]
-log4rs-syslog = "1.0"
+log4rs-syslog = "1.1"
 ```
 
 ### Initialization based on configuration file
@@ -34,7 +42,7 @@ Example configuration file:
 ```yaml
 appenders:
   syslog:
-    kind: syslog
+    kind: libc-syslog
     openlog:
       ident: log4rs-syslog-example
       option: LOG_PID | LOG_NDELAY | LOG_CONS
@@ -57,7 +65,7 @@ extern crate tempfile;
 
 fn main() {
     let mut deserializers = log4rs::file::Deserializers::new();
-    log4rs_syslog::register_deserializer(&mut deserializers);
+    log4rs_syslog::register(&mut deserializers);
 
     // Note that configuration file should have right extension, otherwise log4rs will fail to
     // recognize format.
