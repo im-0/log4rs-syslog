@@ -1,0 +1,19 @@
+#!/bin/sh -xeu
+
+is_nightly_for_clippy() {
+    # Fixed version of nightly for clippy.
+    echo "${TRAVIS_RUST_VERSION}" | grep -qe "^nightly-.*"
+}
+
+if [ "${1}" = "before_script" ]; then
+    if is_nightly_for_clippy; then
+        cargo install clippy --version "${CLIPPY_VERSION}" --force
+    fi
+elif [ "${1}" = "script" ]; then
+    if is_nightly_for_clippy; then
+        cargo clippy
+    fi
+else
+    printf "Unknown command: %s\n" "${1}" >&2
+    exit 1
+fi
