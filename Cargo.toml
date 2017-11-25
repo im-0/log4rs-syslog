@@ -13,7 +13,7 @@ readme = "README.md"
 build = "build.rs"
 
 [badges]
-travis-ci = { repository = "im-0/log4rs-syslog", branch = "master" }
+travis-ci = { repository = "im-0/log4rs-syslog", branch = "b1.1.0" }
 
 [features]
 default = ["file"]
