@@ -8,29 +8,39 @@ use serde;
 
 const DEFAULT_BUF_SIZE: usize = 4096;
 
-struct BufWriter {
-    buf: std::io::Cursor<Vec<u8>>,
+type PersistentBuf = std::io::Cursor<Vec<u8>>;
+
+thread_local! {
+    static PERSISTENT_BUF: std::cell::RefCell<PersistentBuf> =
+        std::cell::RefCell::new(PersistentBuf::new(Vec::with_capacity(DEFAULT_BUF_SIZE)));
 }
 
+struct BufWriter {}
+
 impl BufWriter {
-    pub fn new() -> Self {
-        Self {
-            buf: std::io::Cursor::new(Vec::with_capacity(DEFAULT_BUF_SIZE)),
-        }
+    fn new() -> Self {
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().set_position(0));
+        Self {}
     }
 
-    pub fn into_inner(self) -> Vec<u8> {
-        self.buf.into_inner()
+    fn as_c_str(&mut self) -> *const libc::c_char {
+        use std::io::Write;
+
+        PERSISTENT_BUF.with(|pers_buf| {
+            let mut pers_buf = pers_buf.borrow_mut();
+            pers_buf.write_all(&[0; 1]).unwrap();
+            pers_buf.get_ref().as_ptr() as *const libc::c_char
+        })
     }
 }
 
 impl std::io::Write for BufWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.buf.write(buf)
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().write(buf))
     }
 
     fn flush(&mut self) -> std::io::Result<()> {
-        self.buf.flush()
+        PERSISTENT_BUF.with(|pers_buf| pers_buf.borrow_mut().flush())
     }
 }
 
@@ -75,8 +85,6 @@ impl log4rs::append::Append for SyslogAppender {
         let mut buf = BufWriter::new();
 
         self.encoder.encode(&mut buf, record)?;
-        let mut buf = buf.into_inner();
-        buf.push(0);
 
         let level = match self.level_map {
             Some(ref level_map) => level_map(record.level()),
@@ -95,7 +103,7 @@ impl log4rs::append::Append for SyslogAppender {
             libc::syslog(
                 level,
                 b"%s\0".as_ptr() as *const libc::c_char,
-                buf.as_ptr() as *const libc::c_char,
+                buf.as_c_str(),
             );
         }
 
@@ -343,5 +351,30 @@ impl SyslogAppenderBuilder {
             }),
             level_map: self.level_map,
         }
+    }
+}
+
+#[cfg(all(feature = "unstable", test))]
+mod bench {
+    use test;
+
+    fn bench(bencher: &mut test::Bencher, data: &[u8]) {
+        use std::io::Write;
+
+        bencher.iter(|| {
+            let mut buf = super::BufWriter::new();
+            buf.write(data).unwrap();
+            buf.as_c_str()
+        })
+    }
+
+    #[bench]
+    fn buf_writer_no_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE - 1])
+    }
+
+    #[bench]
+    fn buf_writer_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE])
     }
 }
