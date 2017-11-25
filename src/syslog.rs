@@ -345,3 +345,30 @@ impl SyslogAppenderBuilder {
         }
     }
 }
+
+#[cfg(all(feature = "unstable", test))]
+mod bench {
+    use test;
+
+    fn bench(bencher: &mut test::Bencher, data: &[u8]) {
+        use std::io::Write;
+
+        bencher.iter(|| {
+            let mut buf = super::BufWriter::new();
+            buf.write(data).unwrap();
+            let mut buf = buf.into_inner();
+            buf.push(0);
+            buf.as_ptr()
+        })
+    }
+
+    #[bench]
+    fn buf_writer_no_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE - 1])
+    }
+
+    #[bench]
+    fn buf_writer_realloc(bencher: &mut test::Bencher) {
+        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE])
+    }
+}

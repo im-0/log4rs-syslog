@@ -18,6 +18,7 @@ travis-ci = { repository = "im-0/log4rs-syslog", branch = "b1.0.0" }
 [features]
 default = ["file"]
 file = ["log4rs/file", "serde", "serde_derive"]
+unstable = []
 
 [dependencies]
 bitflags = { version = "0.9", default_features = false }
