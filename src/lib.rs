@@ -3,6 +3,9 @@
 //!
 //! Source code and examples: <https://github.com/im-0/log4rs-syslog>
 
+#![cfg_attr(feature = "unstable", warn(unreachable_pub))]
+#![warn(unused_results)]
+
 // For benchmark.
 #![cfg_attr(feature = "unstable", feature(test))]
 
