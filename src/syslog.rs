@@ -363,7 +363,7 @@ mod bench {
 
         bencher.iter(|| {
             let mut buf = super::BufWriter::new();
-            buf.write(data).unwrap();
+            buf.write_all(data).unwrap();
             buf.as_c_str()
         })
     }

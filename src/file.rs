@@ -91,7 +91,7 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
                     FakeLibcLogLevel::LOG_INFO => libc::LOG_INFO,
                     FakeLibcLogLevel::LOG_DEBUG => libc::LOG_DEBUG,
                 };
-                map.insert(level, libc_level);
+                let _ = map.insert(level, libc_level);
             }
 
             for level in &[
@@ -102,7 +102,7 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
                 log::LogLevel::Trace,
             ]
             {
-                map.get(level).ok_or_else(|| {
+                let _ = map.get(level).ok_or_else(|| {
                     format!("Log level missing in map: {:?}", level)
                 })?;
             }
