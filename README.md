@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/im-0/log4rs-syslog.svg?branch=master)](https://travis-ci.org/im-0/log4rs-syslog)
+[![Build Status](https://api.travis-ci.org/im-0/log4rs-syslog.svg?branch=b3.0.0)](https://travis-ci.org/im-0/log4rs-syslog)
 [![crates.io](https://img.shields.io/crates/v/log4rs-syslog.svg?maxAge=3600)](https://crates.io/crates/log4rs-syslog)
 ![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache_2.0-blue.svg)
 ![POSIX-only build tooling](https://img.shields.io/badge/dev_platform-POSIX-lightgrey.svg)
@@ -132,7 +132,7 @@ fn main() {
 ### Running examples
 
 ```bash
-git clone --branch master https://github.com/im-0/log4rs-syslog
+git clone --branch b3.0.0 https://github.com/im-0/log4rs-syslog
 cd log4rs-syslog
 cargo run --example manually
 cargo run --example from_conf

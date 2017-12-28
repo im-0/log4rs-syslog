@@ -6,14 +6,14 @@ authors = ["Ivan Mironov <mironov.ivan@gmail.com>"]
 license = "MIT/Apache-2.0"
 keywords = ["logger", "log", "logging", "nix", "syslog"]
 categories = ["os::unix-apis"]
-publish = false
+publish = true
 repository = "https://github.com/im-0/log4rs-syslog"
 documentation = "https://docs.rs/crate/log4rs-syslog"
 readme = "README.md"
 build = "build.rs"
 
 [badges]
-travis-ci = { repository = "im-0/log4rs-syslog", branch = "master" }
+travis-ci = { repository = "im-0/log4rs-syslog", branch = "b3.0.0" }
 
 [features]
 default = ["file"]
@@ -21,18 +21,18 @@ file = ["log4rs/file", "log/serde", "serde", "serde_derive"]
 unstable = []
 
 [dependencies]
-bitflags = { version = "*", default_features = false }
-lazy_static = { version = "*", default_features = false }
-libc = { version = "*", default_features = false }
-log = { version = "*", default_features = false }
-log4rs = { version = "*", default_features = false }
-serde = { version = "*", default_features = false, optional = true }
-serde_derive = { version = "*", default_features = false, optional = true }
+bitflags = { version = "1.0", default_features = false }
+lazy_static = { version = "1.0", default_features = false }
+libc = { version = "0.2", default_features = false }
+log = { version = "0.4", default_features = false }
+log4rs = { version = "0.8", default_features = false }
+serde = { version = "1.0", default_features = false, optional = true }
+serde_derive = { version = "1.0", default_features = false, optional = true }
 
 [build-dependencies]
-skeptic = "*"
+skeptic = "0.13"
 
 [dev-dependencies]
-log4rs = "*"
-tempfile = "*"
-skeptic = "*"
+log4rs = "0.8"
+tempfile = "2.2"
+skeptic = "0.13"
