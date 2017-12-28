@@ -1,7 +1,7 @@
-#[macro_use]
-extern crate log;
 extern crate log4rs;
 extern crate log4rs_syslog;
+#[macro_use]
+extern crate log;
 extern crate tempfile;
 
 fn main() {

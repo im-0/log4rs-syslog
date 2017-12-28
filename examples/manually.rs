@@ -1,8 +1,8 @@
 extern crate libc;
-#[macro_use]
-extern crate log;
 extern crate log4rs;
 extern crate log4rs_syslog;
+#[macro_use]
+extern crate log;
 
 fn main() {
     // Use custom PatternEncoder to avoid duplicate timestamps in logs.
@@ -29,13 +29,12 @@ fn main() {
     );
 
     let config = log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build(
-            "syslog",
-            appender,
-        ))
-        .build(log4rs::config::Root::builder().appender("syslog").build(
-            log::LevelFilter::Trace,
-        ))
+        .appender(log4rs::config::Appender::builder().build("syslog", appender))
+        .build(
+            log4rs::config::Root::builder()
+                .appender("syslog")
+                .build(log::LevelFilter::Trace),
+        )
         .unwrap();
     log4rs::init_config(config).unwrap();
 

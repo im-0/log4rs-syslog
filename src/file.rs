@@ -65,10 +65,7 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
         };
 
         if let Some(encoder_conf) = config.encoder {
-            builder = builder.encoder(deserializers.deserialize(
-                &encoder_conf.kind,
-                encoder_conf.config,
-            )?);
+            builder = builder.encoder(deserializers.deserialize(&encoder_conf.kind, encoder_conf.config)?);
         }
 
         if let Some(level_map) = config.level_map {
@@ -100,11 +97,9 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
                 log::Level::Info,
                 log::Level::Debug,
                 log::Level::Trace,
-            ]
-            {
-                let _ = map.get(level).ok_or_else(|| {
-                    format!("Log level missing in map: {:?}", level)
-                })?;
+            ] {
+                let _ = map.get(level)
+                    .ok_or_else(|| format!("Log level missing in map: {:?}", level))?;
             }
 
             builder = builder.level_map(Box::new(move |l| map[&l]));

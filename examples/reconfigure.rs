@@ -1,8 +1,8 @@
 extern crate libc;
-#[macro_use]
-extern crate log;
 extern crate log4rs;
 extern crate log4rs_syslog;
+#[macro_use]
+extern crate log;
 
 trait MaybeOpenLog {
     fn maybe_openlog(self, ident: Option<&str>) -> Self;
@@ -11,13 +11,11 @@ trait MaybeOpenLog {
 impl MaybeOpenLog for log4rs_syslog::SyslogAppenderBuilder {
     fn maybe_openlog(self, ident: Option<&str>) -> Self {
         match ident {
-            Some(ident) => {
-                self.openlog(
-                    ident,
-                    log4rs_syslog::LogOption::empty(),
-                    log4rs_syslog::Facility::Daemon,
-                )
-            },
+            Some(ident) => self.openlog(
+                ident,
+                log4rs_syslog::LogOption::empty(),
+                log4rs_syslog::Facility::Daemon,
+            ),
             None => self,
         }
     }
@@ -31,13 +29,12 @@ fn get_conf(ident: Option<&str>) -> log4rs::config::Config {
     );
 
     log4rs::config::Config::builder()
-        .appender(log4rs::config::Appender::builder().build(
-            "syslog",
-            appender,
-        ))
-        .build(log4rs::config::Root::builder().appender("syslog").build(
-            log::LevelFilter::Trace,
-        ))
+        .appender(log4rs::config::Appender::builder().build("syslog", appender))
+        .build(
+            log4rs::config::Root::builder()
+                .appender("syslog")
+                .build(log::LevelFilter::Trace),
+        )
         .unwrap()
 }
 

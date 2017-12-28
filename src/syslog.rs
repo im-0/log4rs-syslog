@@ -89,13 +89,11 @@ impl log4rs::append::Append for SyslogAppender {
         let level = match self.level_map {
             Some(ref level_map) => level_map(record.level()),
 
-            None => {
-                match record.level() {
-                    log::Level::Error => libc::LOG_ERR,
-                    log::Level::Warn => libc::LOG_WARNING,
-                    log::Level::Info => libc::LOG_INFO,
-                    log::Level::Debug | log::Level::Trace => libc::LOG_DEBUG,
-                }
+            None => match record.level() {
+                log::Level::Error => libc::LOG_ERR,
+                log::Level::Warn => libc::LOG_WARNING,
+                log::Level::Info => libc::LOG_INFO,
+                log::Level::Debug | log::Level::Trace => libc::LOG_DEBUG,
             },
         };
 
@@ -265,9 +263,7 @@ struct IdentHolder {
 
 impl IdentHolder {
     fn new() -> Self {
-        Self {
-            ident: None,
-        }
+        Self { ident: None }
     }
 
     fn openlog(&mut self, mut args: OpenLogArgs) {
@@ -348,9 +344,8 @@ impl SyslogAppenderBuilder {
         );
 
         SyslogAppender {
-            encoder: self.encoder.unwrap_or_else(|| {
-                Box::new(log4rs::encode::pattern::PatternEncoder::default())
-            }),
+            encoder: self.encoder
+                .unwrap_or_else(|| Box::new(log4rs::encode::pattern::PatternEncoder::default())),
             level_map: self.level_map,
         }
     }
