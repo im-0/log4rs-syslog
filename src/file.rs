@@ -13,15 +13,6 @@ struct SyslogAppenderOpenlogConfig {
 }
 
 #[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Deserialize)]
-enum FakeLogLogLevel {
-    Error,
-    Warn,
-    Info,
-    Debug,
-    Trace,
-}
-
-#[derive(PartialEq, Eq, Hash, PartialOrd, Ord, Deserialize)]
 #[allow(non_camel_case_types)]
 enum FakeLibcLogLevel {
     LOG_EMERG,
@@ -34,7 +25,7 @@ enum FakeLibcLogLevel {
     LOG_DEBUG,
 }
 
-type LevelMapConf = std::collections::BTreeMap<FakeLogLogLevel, FakeLibcLogLevel>;
+type LevelMapConf = std::collections::BTreeMap<log::Level, FakeLibcLogLevel>;
 
 #[derive(Deserialize)]
 struct SyslogAppenderConfig {
@@ -71,13 +62,6 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
         if let Some(level_map) = config.level_map {
             let mut map = std::collections::BTreeMap::new();
             for (level, libc_level) in level_map {
-                let level = match level {
-                    FakeLogLogLevel::Error => log::Level::Error,
-                    FakeLogLogLevel::Warn => log::Level::Warn,
-                    FakeLogLogLevel::Info => log::Level::Info,
-                    FakeLogLogLevel::Debug => log::Level::Debug,
-                    FakeLogLogLevel::Trace => log::Level::Trace,
-                };
                 let libc_level = match libc_level {
                     FakeLibcLogLevel::LOG_EMERG => libc::LOG_EMERG,
                     FakeLibcLogLevel::LOG_ALERT => libc::LOG_ALERT,
