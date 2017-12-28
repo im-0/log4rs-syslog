@@ -36,7 +36,7 @@ fn get_conf(ident: Option<&str>) -> log4rs::config::Config {
             appender,
         ))
         .build(log4rs::config::Root::builder().appender("syslog").build(
-            log::LogLevelFilter::Trace,
+            log::LevelFilter::Trace,
         ))
         .unwrap()
 }

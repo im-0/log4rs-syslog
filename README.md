@@ -111,7 +111,7 @@ fn main() {
             appender,
         ))
         .build(log4rs::config::Root::builder().appender("syslog").build(
-            log::LogLevelFilter::Trace,
+            log::LevelFilter::Trace,
         ))
         .unwrap();
     log4rs::init_config(config).unwrap();

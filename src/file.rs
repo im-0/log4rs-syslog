@@ -75,11 +75,11 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
             let mut map = std::collections::BTreeMap::new();
             for (level, libc_level) in level_map {
                 let level = match level {
-                    FakeLogLogLevel::Error => log::LogLevel::Error,
-                    FakeLogLogLevel::Warn => log::LogLevel::Warn,
-                    FakeLogLogLevel::Info => log::LogLevel::Info,
-                    FakeLogLogLevel::Debug => log::LogLevel::Debug,
-                    FakeLogLogLevel::Trace => log::LogLevel::Trace,
+                    FakeLogLogLevel::Error => log::Level::Error,
+                    FakeLogLogLevel::Warn => log::Level::Warn,
+                    FakeLogLogLevel::Info => log::Level::Info,
+                    FakeLogLogLevel::Debug => log::Level::Debug,
+                    FakeLogLogLevel::Trace => log::Level::Trace,
                 };
                 let libc_level = match libc_level {
                     FakeLibcLogLevel::LOG_EMERG => libc::LOG_EMERG,
@@ -95,11 +95,11 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
             }
 
             for level in &[
-                log::LogLevel::Error,
-                log::LogLevel::Warn,
-                log::LogLevel::Info,
-                log::LogLevel::Debug,
-                log::LogLevel::Trace,
+                log::Level::Error,
+                log::Level::Warn,
+                log::Level::Info,
+                log::Level::Debug,
+                log::Level::Trace,
             ]
             {
                 let _ = map.get(level).ok_or_else(|| {

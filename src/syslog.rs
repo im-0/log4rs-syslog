@@ -47,7 +47,7 @@ impl std::io::Write for BufWriter {
 impl log4rs::encode::Write for BufWriter {}
 
 /// Function for mapping rust's `log` levels to `libc`'s log levels.
-pub type LevelMap = Fn(log::LogLevel) -> libc::c_int + Send + Sync;
+pub type LevelMap = Fn(log::Level) -> libc::c_int + Send + Sync;
 
 /// An appender which writes log invents into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
@@ -81,7 +81,7 @@ impl SyslogAppender {
 }
 
 impl log4rs::append::Append for SyslogAppender {
-    fn append(&self, record: &log::LogRecord) -> std::result::Result<(), Box<std::error::Error + Sync + Send>> {
+    fn append(&self, record: &log::Record) -> std::result::Result<(), Box<std::error::Error + Sync + Send>> {
         let mut buf = BufWriter::new();
 
         self.encoder.encode(&mut buf, record)?;
@@ -91,10 +91,10 @@ impl log4rs::append::Append for SyslogAppender {
 
             None => {
                 match record.level() {
-                    log::LogLevel::Error => libc::LOG_ERR,
-                    log::LogLevel::Warn => libc::LOG_WARNING,
-                    log::LogLevel::Info => libc::LOG_INFO,
-                    log::LogLevel::Debug | log::LogLevel::Trace => libc::LOG_DEBUG,
+                    log::Level::Error => libc::LOG_ERR,
+                    log::Level::Warn => libc::LOG_WARNING,
+                    log::Level::Info => libc::LOG_INFO,
+                    log::Level::Debug | log::Level::Trace => libc::LOG_DEBUG,
                 }
             },
         };
@@ -109,6 +109,8 @@ impl log4rs::append::Append for SyslogAppender {
 
         Ok(())
     }
+
+    fn flush(&self) {}
 }
 
 bitflags! {
