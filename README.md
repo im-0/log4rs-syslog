@@ -22,6 +22,9 @@ There is no proper way to fix this limitations while using libc's interface.
 
 ## Breaking changes
 
+**2.0 → 3.0**
+* Update to `log` 0.4 and `log4rs` 0.8.
+
 **1.0 → 2.0**
 * `log4rs_syslog::register_deserializer()` renamed to `log4rs_syslog::register()`.
 * `kind` in deserializable configuration file changed from `syslog` to `libc-syslog`.
@@ -33,7 +36,7 @@ There is no proper way to fix this limitations while using libc's interface.
 Add this to your Cargo.toml:
 ```toml
 [dependencies]
-log4rs-syslog = "2.0"
+log4rs-syslog = "3.0"
 ```
 
 ### Initialization based on configuration file
