@@ -34,6 +34,7 @@ There is no proper way to fix this limitations while using libc's interface.
 ## Usage
 
 Add this to your Cargo.toml:
+
 ```toml
 [dependencies]
 log4rs-syslog = "3.0"
@@ -42,6 +43,7 @@ log4rs-syslog = "3.0"
 ### Initialization based on configuration file
 
 Example configuration file:
+
 ```yaml
 appenders:
   syslog:
@@ -59,6 +61,7 @@ root:
 ```
 
 Example code:
+
 ```rust,no_run
 #[macro_use]
 extern crate log;
@@ -87,6 +90,7 @@ fn main() {
 ### Manual initialization
 
 Example code:
+
 ```rust,no_run
 #[macro_use]
 extern crate log;
