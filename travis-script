@@ -22,6 +22,9 @@ elif [ "${1}" = "script" ]; then
     if is_nightly; then
         cargo bench --features unstable
     fi
+
+    # tests/skeptic.rs will fail without this.
+    cargo clean
 else
     printf "Unknown command: %s\n" "${1}" >&2
     exit 1
