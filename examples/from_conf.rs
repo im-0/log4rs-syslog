@@ -34,9 +34,9 @@ root:
     - syslog
 "#;
     // Note that configuration file should have right extension, otherwise log4rs will fail to recognize format.
-    let mut tmp_conf = tempfile::NamedTempFileOptions::new()
+    let mut tmp_conf = tempfile::Builder::new()
         .suffix(".yaml")
-        .create()
+        .tempfile()
         .unwrap();
     tmp_conf.write_all(yaml_conf).unwrap();
     tmp_conf.flush().unwrap();
