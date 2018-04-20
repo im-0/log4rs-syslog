@@ -67,7 +67,6 @@ Example code:
 extern crate log;
 extern crate log4rs;
 extern crate log4rs_syslog;
-extern crate tempfile;
 
 fn main() {
     let mut deserializers = log4rs::file::Deserializers::new();
