@@ -31,5 +31,5 @@ serde_derive = { version = "1.0", default_features = false, optional = true }
 [dev-dependencies]
 glob = "0.2"
 log4rs = "0.8"
-tempfile = "2.2"
-which = "1.0"
+tempfile = "3.0"
+which = "2.0"
