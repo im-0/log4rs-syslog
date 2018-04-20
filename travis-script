@@ -20,7 +20,7 @@ elif [ "${1}" = "script" ]; then
     fi
 
     if is_nightly; then
-        cargo bench --features unstable
+        cargo bench --features unstable --all-targets
     fi
 
     # tests/skeptic.rs will fail without this.
