@@ -367,11 +367,11 @@ mod bench {
 
     #[bench]
     fn buf_writer_no_realloc(bencher: &mut test::Bencher) {
-        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE - 1])
+        bench(bencher, &[b'x'; super::DEFAULT_BUF_SIZE - 1])
     }
 
     #[bench]
     fn buf_writer_realloc(bencher: &mut test::Bencher) {
-        bench(bencher, &['x' as u8; super::DEFAULT_BUF_SIZE])
+        bench(bencher, &[b'x'; super::DEFAULT_BUF_SIZE])
     }
 }
