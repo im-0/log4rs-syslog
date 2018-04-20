@@ -16,11 +16,11 @@ if [ "${1}" = "before_script" ]; then
     fi
 elif [ "${1}" = "script" ]; then
     if is_nightly_for_clippy; then
-        cargo clippy --features unstable
+        cargo clippy --features unstable --all-targets
     fi
 
     if is_nightly; then
-        cargo bench --features unstable --all-targets
+        cargo bench --features unstable
     fi
 
     # tests/skeptic.rs will fail without this.
