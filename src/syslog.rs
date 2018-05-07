@@ -178,7 +178,7 @@ impl<'de> serde::de::Deserialize<'de> for LogOption {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "file", derive(Deserialize))]
 /// The type of program.
 pub enum Facility {
