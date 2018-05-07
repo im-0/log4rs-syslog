@@ -24,12 +24,11 @@ bitflags = { version = "1.0", default_features = false }
 lazy_static = { version = "1.0", default_features = false }
 libc = { version = "0.2", default_features = false }
 log = { version = "0.4", default_features = false }
-log4rs = { version = "0.8", default_features = false }
+log4rs = { version = "0.8", default_features = false, features = ["pattern_encoder"] }
 serde = { version = "1.0", default_features = false, optional = true }
 serde_derive = { version = "1.0", default_features = false, optional = true }
 
 [dev-dependencies]
-glob = "0.2"
-log4rs = "0.8"
-tempfile = "3.0"
-which = "2.0"
+glob = { version = "0.2", default_features = false }
+tempfile = { version = "3.0", default_features = false }
+which = { version = "2.0", default_features = false }
