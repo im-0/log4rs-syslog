@@ -29,7 +29,7 @@ serde = { version = "*", default_features = false, optional = true }
 serde_derive = { version = "*", default_features = false, optional = true }
 
 [dev-dependencies]
-glob = "*"
-log4rs = "*"
-tempfile = "*"
-which = "*"
+glob = { version = "*", default_features = false }
+log4rs = { version = "*", default_features = false }
+tempfile = { version = "*", default_features = false }
+which = { version = "*", default_features = false }
