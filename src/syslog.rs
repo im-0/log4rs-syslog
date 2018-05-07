@@ -49,7 +49,7 @@ impl log4rs::encode::Write for BufWriter {}
 /// Function for mapping rust's `log` levels to `libc`'s log levels.
 pub type LevelMap = Fn(log::Level) -> libc::c_int + Send + Sync;
 
-/// An appender which writes log invents into syslog using `libc`'s syslog() function.
+/// An appender which writes log events into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
     encoder: Box<log4rs::encode::Encode>,
     level_map: Option<Box<LevelMap>>,
