@@ -81,11 +81,15 @@ impl SyslogAppender {
 }
 
 impl log4rs::append::Append for SyslogAppender {
-    fn append(&self, record: &log::Record) -> std::result::Result<(), Box<std::error::Error + Sync + Send>> {
+    fn append(
+        &self,
+        record: &log4rs::record::ExtendedRecord,
+    ) -> std::result::Result<(), Box<std::error::Error + Sync + Send>> {
         let mut buf = BufWriter::new();
 
         self.encoder.encode(&mut buf, record)?;
 
+        let record = record.record();
         let level = match self.level_map {
             Some(ref level_map) => level_map(record.level()),
 
