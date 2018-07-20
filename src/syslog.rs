@@ -98,6 +98,8 @@ impl log4rs::append::Append for SyslogAppender {
         };
 
         unsafe {
+            // This function may use the `ident` pointer previously set by `libc::openlog()`, until the call to
+            // `libc::closelog()`.
             libc::syslog(
                 level,
                 b"%s\0".as_ptr() as *const libc::c_char,
@@ -270,6 +272,9 @@ impl IdentHolder {
         args.ident.push('\0');
 
         unsafe {
+            // This globally sets the `ident` pointer, which may be used by subsequent calls to the `libc::syslog()`
+            // function. Pointer should remain valid and unchanged until either call to `libc::closelog()` or call
+            // to `libc::openlog()` with new value of `ident`.
             libc::openlog(
                 args.ident.as_ptr() as *const libc::c_char,
                 args.log_option.bits(),
@@ -284,6 +289,8 @@ impl IdentHolder {
     fn closelog(&mut self) {
         if self.ident.is_some() {
             unsafe {
+                // Among other things, this call discards the `ident` pointer set by `libc::openlog()`.
+                // After this call, `ident` may be safely dropped.
                 libc::closelog();
             }
         }
