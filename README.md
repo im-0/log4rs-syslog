@@ -22,6 +22,9 @@ There is no proper way to fix this limitations while using libc's interface.
 
 ## Breaking changes
 
+**3.0 → 4.0**
+* Update to `log4rs` 0.13, `bitflags` to 1.2 and `lazy_static` to 1.4.
+
 **2.0 → 3.0**
 * Update to `log` 0.4 and `log4rs` 0.8.
 
@@ -37,7 +40,7 @@ Add this to your Cargo.toml:
 
 ```toml
 [dependencies]
-log4rs-syslog = "3.0"
+log4rs-syslog = "4.0"
 ```
 
 ### Initialization based on configuration file

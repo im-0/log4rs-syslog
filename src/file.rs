@@ -39,14 +39,14 @@ struct SyslogAppenderConfig {
 struct SyslogAppenderDeserializer;
 
 impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
-    type Trait = log4rs::append::Append;
+    type Trait = dyn log4rs::append::Append;
     type Config = SyslogAppenderConfig;
 
     fn deserialize(
         &self,
         config: Self::Config,
         deserializers: &log4rs::file::Deserializers,
-    ) -> Result<Box<Self::Trait>, Box<std::error::Error + Sync + Send>> {
+    ) -> Result<Box<Self::Trait>, Box<dyn std::error::Error + Sync + Send>> {
         let mut builder = syslog::SyslogAppender::builder();
 
         if let Some(openlog_conf) = config.openlog {
