@@ -1,7 +1,7 @@
 [package]
 name = "log4rs-syslog"
 description = "Syslog appender for log4rs based on libc's syslog() function (*nix only)"
-version = "3.0.3"
+version = "4.0.0"
 authors = ["Ivan Mironov <mironov.ivan@gmail.com>"]
 license = "MIT/Apache-2.0"
 keywords = ["logger", "log", "logging", "nix", "syslog"]
@@ -20,11 +20,11 @@ file = ["log4rs/file", "log/serde", "serde", "serde_derive"]
 unstable = []
 
 [dependencies]
-bitflags = { version = "1.0", default_features = false }
-lazy_static = { version = "1.0", default_features = false }
+bitflags = { version = "1.2", default_features = false }
+lazy_static = { version = "1.4", default_features = false }
 libc = { version = "0.2", default_features = false }
 log = { version = "0.4", default_features = false }
-log4rs = { version = "0.8", default_features = false, features = ["pattern_encoder"] }
+log4rs = { version = "0.13", default_features = false, features = ["pattern_encoder"] }
 serde = { version = "1.0", default_features = false, optional = true }
 serde_derive = { version = "1.0", default_features = false, optional = true }
 
