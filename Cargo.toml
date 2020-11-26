@@ -15,16 +15,17 @@ readme = "README.md"
 travis-ci = { repository = "im-0/log4rs-syslog", branch = "b3.0.0" }
 
 [features]
-default = ["file"]
-file = ["log4rs/file", "log/serde", "serde", "serde_derive"]
+default = ["config_parsing"]
+config_parsing = ["log4rs/config_parsing", "log/serde", "serde", "serde_derive"]
 unstable = []
 
 [dependencies]
+anyhow = "1.0"
 bitflags = { version = "1.0", default_features = false }
 lazy_static = { version = "1.0", default_features = false }
 libc = { version = "0.2", default_features = false }
 log = { version = "0.4", default_features = false }
-log4rs = { version = "0.8", default_features = false, features = ["pattern_encoder"] }
+log4rs = { version = "1.0.0-alpha-2", default_features = false, features = ["pattern_encoder"] }
 serde = { version = "1.0", default_features = false, optional = true }
 serde_derive = { version = "1.0", default_features = false, optional = true }
 
