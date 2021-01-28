@@ -38,15 +38,15 @@ struct SyslogAppenderConfig {
 
 struct SyslogAppenderDeserializer;
 
-impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
-    type Trait = log4rs::append::Append;
+impl log4rs::config::Deserialize for SyslogAppenderDeserializer {
+    type Trait = dyn log4rs::append::Append;
     type Config = SyslogAppenderConfig;
 
     fn deserialize(
         &self,
         config: Self::Config,
-        deserializers: &log4rs::file::Deserializers,
-    ) -> Result<Box<Self::Trait>, Box<std::error::Error + Sync + Send>> {
+        deserializers: &log4rs::config::Deserializers,
+    ) -> anyhow::Result<Box<Self::Trait>> {
         let mut builder = syslog::SyslogAppender::builder();
 
         if let Some(openlog_conf) = config.openlog {
@@ -85,7 +85,7 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
                 log::Level::Trace,
             ] {
                 let _ = map.get(level)
-                    .ok_or_else(|| format!("Log level missing in map: {:?}", level))?;
+                    .ok_or_else(|| anyhow::anyhow!("Log level missing in map: {:?}", level))?;
             }
 
             builder = builder.level_map(Box::new(move |l| map[&l]));
@@ -105,10 +105,10 @@ impl log4rs::file::Deserialize for SyslogAppenderDeserializer {
 /// extern crate log4rs;
 /// extern crate log4rs_syslog;
 ///
-/// let mut deserializers = log4rs::file::Deserializers::new();
+/// let mut deserializers = log4rs::config::Deserializers::new();
 /// log4rs_syslog::register(&mut deserializers);
 /// let result = log4rs::init_file("/path/to/log-conf.yaml", deserializers);
 /// ```
-pub fn register(deserializers: &mut log4rs::file::Deserializers) {
+pub fn register(deserializers: &mut log4rs::config::Deserializers) {
     deserializers.insert("libc-syslog", SyslogAppenderDeserializer);
 }

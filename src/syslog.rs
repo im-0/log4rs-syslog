@@ -3,7 +3,7 @@ use std;
 use libc;
 use log;
 use log4rs;
-#[cfg(feature = "file")]
+#[cfg(feature = "config_parsing")]
 use serde;
 
 const DEFAULT_BUF_SIZE: usize = 4096;
@@ -47,11 +47,11 @@ impl std::io::Write for BufWriter {
 impl log4rs::encode::Write for BufWriter {}
 
 /// Function for mapping rust's `log` levels to `libc`'s log levels.
-pub type LevelMap = Fn(log::Level) -> libc::c_int + Send + Sync;
+pub type LevelMap = dyn Fn(log::Level) -> libc::c_int + Send + Sync;
 
 /// An appender which writes log invents into syslog using `libc`'s syslog() function.
 pub struct SyslogAppender {
-    encoder: Box<log4rs::encode::Encode>,
+    encoder: Box<dyn log4rs::encode::Encode>,
     level_map: Option<Box<LevelMap>>,
 }
 
@@ -81,7 +81,8 @@ impl SyslogAppender {
 }
 
 impl log4rs::append::Append for SyslogAppender {
-    fn append(&self, record: &log::Record) -> std::result::Result<(), Box<std::error::Error + Sync + Send>> {
+    // fn append(&self, record: &log::Record) -> std::result::Result<(), Box<dyn std::error::Error + Sync + Send>> {
+    fn append(&self, record: &log::Record) -> anyhow::Result<()> {
         let mut buf = BufWriter::new();
 
         self.encoder.encode(&mut buf, record)?;
@@ -133,10 +134,10 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "file")]
+#[cfg(feature = "config_parsing")]
 struct LogOptionVisitor;
 
-#[cfg(feature = "file")]
+#[cfg(feature = "config_parsing")]
 impl<'de> serde::de::Visitor<'de> for LogOptionVisitor {
     type Value = LogOption;
 
@@ -170,7 +171,7 @@ impl<'de> serde::de::Visitor<'de> for LogOptionVisitor {
     }
 }
 
-#[cfg(feature = "file")]
+#[cfg(feature = "config_parsing")]
 impl<'de> serde::de::Deserialize<'de> for LogOption {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -181,7 +182,7 @@ impl<'de> serde::de::Deserialize<'de> for LogOption {
 }
 
 #[derive(Debug)]
-#[cfg_attr(feature = "file", derive(Deserialize))]
+#[cfg_attr(feature = "config_parsing", derive(Deserialize))]
 /// The type of program.
 pub enum Facility {
     /// Security/authorization.
@@ -315,14 +316,14 @@ lazy_static! {
 
 /// Builder for `SyslogAppender`.
 pub struct SyslogAppenderBuilder {
-    encoder: Option<Box<log4rs::encode::Encode>>,
+    encoder: Option<Box<dyn log4rs::encode::Encode>>,
     openlog_args: Option<OpenLogArgs>,
     level_map: Option<Box<LevelMap>>,
 }
 
 impl SyslogAppenderBuilder {
     /// Set custom encoder.
-    pub fn encoder(mut self, encoder: Box<log4rs::encode::Encode>) -> Self {
+    pub fn encoder(mut self, encoder: Box<dyn log4rs::encode::Encode>) -> Self {
         self.encoder = Some(encoder);
         self
     }
