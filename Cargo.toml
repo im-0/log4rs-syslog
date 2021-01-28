@@ -25,7 +25,7 @@ bitflags = { version = "1.0", default_features = false }
 lazy_static = { version = "1.0", default_features = false }
 libc = { version = "0.2", default_features = false }
 log = { version = "0.4", default_features = false }
-log4rs = { version = "1.0.0-alpha-2", default_features = false, features = ["pattern_encoder"] }
+log4rs = { version = "1.0.0", default_features = false, features = ["pattern_encoder"] }
 serde = { version = "1.0", default_features = false, optional = true }
 serde_derive = { version = "1.0", default_features = false, optional = true }
 
