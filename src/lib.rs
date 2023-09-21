@@ -38,13 +38,6 @@ extern crate serde_derive;
 extern crate test; // For benchmark.
 
 #[cfg(target_family = "unix")]
-#[cfg(feature = "file")]
-mod file;
-#[cfg(target_family = "unix")]
-#[cfg(feature = "file")]
-pub use file::*;
-
-#[cfg(target_family = "unix")]
 mod syslog;
 #[cfg(target_family = "unix")]
 pub use syslog::*;

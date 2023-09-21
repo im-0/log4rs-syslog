@@ -7,9 +7,6 @@ extern crate tempfile;
 fn main() {
     use std::io::Write;
 
-    let mut deserializers = log4rs::file::Deserializers::new();
-    log4rs_syslog::register(&mut deserializers);
-
     let yaml_conf = br#"
 appenders:
   syslog:
@@ -41,7 +38,7 @@ root:
     tmp_conf.write_all(yaml_conf).unwrap();
     tmp_conf.flush().unwrap();
 
-    log4rs::init_file(tmp_conf.path(), deserializers).unwrap();
+    log4rs::init_file(tmp_conf.path(), Default::default()).unwrap();
 
     trace!("Example trace message");
     debug!("Example debug message");

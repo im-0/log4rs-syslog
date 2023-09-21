@@ -69,12 +69,9 @@ extern crate log4rs;
 extern crate log4rs_syslog;
 
 fn main() {
-    let mut deserializers = log4rs::file::Deserializers::new();
-    log4rs_syslog::register(&mut deserializers);
-
     // Note that configuration file should have right extension, otherwise log4rs will fail to
     // recognize format.
-    log4rs::init_file("test.yaml", deserializers).unwrap();
+    log4rs::init_file("test.yaml", Default::default()).unwrap();
 
     trace!("Example trace message");
     debug!("Example debug message");
